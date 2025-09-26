@@ -15,7 +15,7 @@ class Router {
         this.routes.push({ method: "POST", path, handler });
     }
 
-    handle(req: http.IncomingMessage, res: http.ServerResponse) {
+    handle(req: http.IncomingMessage, res: http.ServerResponse) {    
         const parsedUrl = new URL(req.url || "", `http://${req.headers.host}`);
         const pathname = parsedUrl.pathname;
         const method = req.method;
