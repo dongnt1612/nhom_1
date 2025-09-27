@@ -111,6 +111,11 @@ func devicesHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid input", http.StatusBadRequest)
 			return
 		}
+		err := d.Validate()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		updated, found := store.Update(id, &d)
 		if !found {
 			http.Error(w, "Not found", http.StatusNotFound)
@@ -153,4 +158,15 @@ func main() {
 	fmt.Println("  GET    /api/devices")
 
 	log.Fatal(http.ListenAndServe(port, nil))
+}
+
+func (d *Device) Validate() error {
+    if d.ID <= 0 {
+        return fmt.Errorf("id must be greater than 0")
+    }
+    if strings.TrimSpace(d.Name) == "" {
+        return fmt.Errorf("name cannot be empty")
+    }
+
+    return nil
 }
