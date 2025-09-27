@@ -111,6 +111,7 @@ func devicesHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid input", http.StatusBadRequest)
 			return
 		}
+		d.ID = id 
 		err := d.Validate()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
