@@ -168,6 +168,18 @@ func (d *Device) Validate() error {
     if strings.TrimSpace(d.Name) == "" {
         return fmt.Errorf("name cannot be empty")
     }
+	
+	if strings.TrimSpace(d.Type) == "" {
+		return fmt.Errorf("type cannot be empty")
+	}
 
+	 // giả sử status chỉ cho phép "Active" hoặc "Inactive"
+    validStatuses := map[string]bool{
+        "Active":   true,
+        "Inactive": true,
+    }
+    if !validStatuses[d.Status] {
+        return fmt.Errorf("invalid status: %s", d.Status)
+    }
     return nil
 }
