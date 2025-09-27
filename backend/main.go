@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -23,12 +25,12 @@ type DeviceStore struct {
 }
 
 // NewDeviceStore creates a new device store with sample data
-func NewDeviceStore() *DeviceStore {
+func NewDeviceStore() DeviceRepository {
 	return &DeviceStore{
 		devices: []*Device{
-			{ID: 1, Name: "Laptop", Type: "Computer", Status: "Active"},
-			{ID: 2, Name: "Printer", Type: "Peripheral", Status: "Inactive"},
-			{ID: 3, Name: "Router", Type: "Network", Status: "Active"},
+			//{ID: 1, Name: "Laptop", Type: "Computer", Status: "Active"},
+			//{ID: 2, Name: "Printer", Type: "Peripheral", Status: "Inactive"},
+			//{ID: 3, Name: "Router", Type: "Network", Status: "Active"},
 		},
 	}
 }
@@ -40,6 +42,22 @@ func (ds *DeviceStore) GetAll() []*Device {
 	return ds.devices
 }
 
+// Update modifies an existing device by ID
+func (ds *DeviceStore) Update(id int, d *Device) (*Device, bool) {
+	ds.mu.Lock()
+	defer ds.mu.Unlock()
+
+	for _, dev := range ds.devices {
+		if dev.ID == id {
+			dev.Name = d.Name
+			dev.Type = d.Type
+			dev.Status = d.Status
+			return dev, true
+		}
+	}
+	return nil, false
+}
+
 var store = NewDeviceStore()
 
 // CORS middleware
@@ -47,6 +65,19 @@ func enableCORS(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+}
+
+// Helper: extract ID từ URL
+func getIDFromPath(path string) (int, bool) {
+	parts := strings.Split(strings.Trim(path, "/"), "/")
+	if len(parts) < 3 {
+		return 0, false
+	}
+	id, err := strconv.Atoi(parts[2])
+	if err != nil {
+		return 0, false
+	}
+	return id, true
 }
 
 // HTTP Handlers
@@ -58,14 +89,48 @@ func devicesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	devices := store.GetAll()
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(devices)
+	switch r.Method {
+	case "GET":
+		devices := store.GetAll()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(devices)
+
+	case "PUT":
+		id, ok := getIDFromPath(r.URL.Path)
+		if !ok {
+			http.Error(w, "Invalid ID", http.StatusBadRequest)
+			return
+		}
+		var d Device
+		if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+			http.Error(w, "Invalid input", http.StatusBadRequest)
+			return
+		}
+		updated, found := store.Update(id, &d)
+		if !found {
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(updated)
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+
+	//if r.Method != "GET" {
+	//	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	//	return
+	//}
+	//
+	//devices := store.GetAll()
+	//w.Header().Set("Content-Type", "application/json")
+	//json.NewEncoder(w).Encode(devices)
 }
 
 func main() {
