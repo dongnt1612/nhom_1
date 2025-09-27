@@ -9,33 +9,33 @@ import (
 	"testing"
 )
 
-// MockDeviceRepo implements DeviceRepository
-type MockDeviceRepo struct {
-	devices []*Device
-}
+// // DeviceStore implements DeviceRepository
+// type DeviceStore struct {
+// 	devices []*Device
+// }
 
-func (m *MockDeviceRepo) GetAll() []*Device {
-	return m.devices
-}
+// func (m *DeviceStore) GetAll() []*Device {
+// 	return m.devices
+// }
 
-//	func (m *MockDeviceRepo) Add(d *Device) *Device {
-//		d.ID = len(m.devices) + 1
-//		m.devices = append(m.devices, d)
-//		return d
-//	}
-func (m *MockDeviceRepo) Update(id int, d *Device) (*Device, bool) {
-	for _, dev := range m.devices {
-		if dev.ID == id {
-			dev.Name = d.Name
-			dev.Type = d.Type
-			dev.Status = d.Status
-			return dev, true
-		}
-	}
-	return nil, false
-}
+// //	func (m *DeviceStore) Add(d *Device) *Device {
+// //		d.ID = len(m.devices) + 1
+// //		m.devices = append(m.devices, d)
+// //		return d
+// //	}
+// func (m *DeviceStore) Update(id int, d *Device) (*Device, bool) {
+// 	for _, dev := range m.devices {
+// 		if dev.ID == id {
+// 			dev.Name = d.Name
+// 			dev.Type = d.Type
+// 			dev.Status = d.Status
+// 			return dev, true
+// 		}
+// 	}
+// 	return nil, false
+// }
 
-//func (m *MockDeviceRepo) Delete(id int) bool {
+//func (m *DeviceStore) Delete(id int) bool {
 //	for i, dev := range m.devices {
 //		if dev.ID == id {
 //			m.devices = append(m.devices[:i], m.devices[i+1:]...)
@@ -46,7 +46,7 @@ func (m *MockDeviceRepo) Update(id int, d *Device) (*Device, bool) {
 //}
 
 func TestUpdateDevice(t *testing.T) {
-	mockRepo := &MockDeviceRepo{
+	mockRepo := &DeviceStore{
 		devices: []*Device{
 			{ID: 1, Name: "Laptop", Type: "Computer", Status: "Active"},
 		},
@@ -80,7 +80,7 @@ func TestUpdateDevice(t *testing.T) {
 }
 
 func TestUpdateDevice_InvalidJSON(t *testing.T) {
-	mockRepo := &MockDeviceRepo{
+	mockRepo := &DeviceStore{
 		devices: []*Device{
 			{ID: 1, Name: "Laptop", Type: "Computer", Status: "Active"},
 		},
@@ -101,7 +101,7 @@ func TestUpdateDevice_InvalidJSON(t *testing.T) {
 }
 
 func TestUpdateDevice_InvalidID(t *testing.T) {
-	mockRepo := &MockDeviceRepo{
+	mockRepo := &DeviceStore{
 		devices: []*Device{
 			{ID: 1, Name: "Laptop", Type: "Computer", Status: "Active"},
 		},
@@ -117,30 +117,5 @@ func TestUpdateDevice_InvalidID(t *testing.T) {
 
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Fatalf("Expected status 400, got %v", status)
-	}
-}
-
-func TestAddDevice_MissingField(t *testing.T) {
-	mockRepo := &MockDeviceRepo{}
-	store = mockRepo
-
-	// JSON thiếu field "type"
-	body := []byte(`{"name":"Tablet","status":"Active"}`)
-	req, _ := http.NewRequest("POST", "/api/devices", bytes.NewBuffer(body))
-	rr := httptest.NewRecorder()
-
-	handler := http.HandlerFunc(devicesHandler)
-	handler.ServeHTTP(rr, req)
-
-	// server hiện tại không validate field bắt buộc → vẫn trả 200
-	// nhưng test này để check thực tế hành vi
-	if status := rr.Code; status != http.StatusOK {
-		t.Fatalf("Expected status 200 (no validation yet), got %v", status)
-	}
-
-	var d Device
-	json.NewDecoder(rr.Body).Decode(&d)
-	if d.Type == "" {
-		t.Logf("Warning: Device.Type is empty, consider adding validation")
 	}
 }

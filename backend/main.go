@@ -25,12 +25,12 @@ type DeviceStore struct {
 }
 
 // NewDeviceStore creates a new device store with sample data
-func NewDeviceStore() DeviceRepository {
+func NewDeviceStore() *DeviceStore {
 	return &DeviceStore{
 		devices: []*Device{
-			//{ID: 1, Name: "Laptop", Type: "Computer", Status: "Active"},
-			//{ID: 2, Name: "Printer", Type: "Peripheral", Status: "Inactive"},
-			//{ID: 3, Name: "Router", Type: "Network", Status: "Active"},
+			{ID: 1, Name: "Laptop", Type: "Computer", Status: "Active"},
+			{ID: 2, Name: "Printer", Type: "Peripheral", Status: "Inactive"},
+			{ID: 3, Name: "Router", Type: "Network", Status: "Active"},
 		},
 	}
 }
@@ -150,6 +150,7 @@ func main() {
 
 	// API routes
 	http.HandleFunc("/api/devices", devicesHandler)
+	http.HandleFunc("/api/devices/", devicesHandler)
 
 	port := ":8080"
 	fmt.Printf("Server starting on http://localhost%s\n", port)
