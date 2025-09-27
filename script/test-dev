@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# script/test: Run Go backend tests.
+# script/test-dev: Run Go backend tests with ReportPortal integration.
 
 # Exit immediately if an error occurs
 set -euo pipefail
@@ -8,5 +8,20 @@ set -euo pipefail
 # Go to the project directory
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-echo '==> Running Go backend tests...'
-go test ./backend -v -cover -coverprofile=backend/coverage.out
+echo '==> Running Go backend tests with ReportPortal integration...'
+
+# Prepare launch attributes for goRP
+GORP_ATTRIBUTES=""
+for attr in $LAUNCH_ATTRIBUTES; do
+    GORP_ATTRIBUTES="$GORP_ATTRIBUTES -a $attr"
+done
+
+# Run tests with JSON output and report to ReportPortal
+go test -json -v -cover -coverprofile=backend/coverage.out ./backend | \
+    gorp --uuid "$GORP_UUID" --project "$GORP_PROJECT" --host "$GORP_HOST" \
+        report test2json \
+        --ln "$LAUNCH_NAME" \
+        $GORP_ATTRIBUTES \
+        --print-launch-uuid
+
+echo '==> Test results reported to ReportPortal'

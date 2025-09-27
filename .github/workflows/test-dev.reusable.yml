@@ -19,6 +19,16 @@ jobs:
           go-version: '1.21'
           cache: true
 
+      - name: Install goRP
+        run: |
+          curl -s https://api.github.com/repos/reportportal/goRP/releases/latest | \
+            jq -r '.assets[] | select(.name | contains ("tar.gz")) | .browser_download_url' | \
+            grep "$(uname)_$(arch)" | \
+            xargs curl -sL | sudo tar zx -C /usr/local/bin
+
+          # Verify installation
+          gorp --version
+
       - name: Setup environment
         run: ./script/setup-dev
         env:
@@ -26,6 +36,38 @@ jobs:
 
       - name: Run tests
         run: ./script/test-dev
+        env:
+          AGENT_NO_ANALYTICS: true
+          # goRP configuration based on README.md
+          GORP_UUID: ${{ secrets.RP_API_KEY }}
+          GORP_PROJECT: ${{ vars.RP_PROJECT }}
+          GORP_HOST: ${{ vars.RP_URL }}
+          # Launch configuration
+          LAUNCH_NAME: "Learn Testing | Go Unit Tests | ${{ github.ref_name }}"
+          LAUNCH_DESCRIPTION: |
+            ### Launch Details
+            - **Repository**: [${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})
+            - **Ref**: [`${{ github.ref }}`](${{ github.server_url }}/${{ github.repository }}/${{ startsWith(github.ref, 'refs/pull/') && format('pull/{0}', github.event.pull_request.number) || startsWith(github.ref, 'refs/tags/') && format('releases/tag/{0}', github.ref_name) || format('tree/{0}', github.ref_name) }})
+            - **Commit**: [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+            - **Run**: [#${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - **Run Attempt**: [${{ github.run_attempt }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }})
+            - **Environment**: Development
+            - **Triggered By**: [@${{ github.actor }}](${{ github.server_url }}/${{ github.actor }})
+            - **Event**: `${{ github.event_name }}`
+          # Launch attributes using goRP format (key:value)
+          LAUNCH_ATTRIBUTES: >-
+            github.actor:${{ github.actor }}
+            github.ref:${{ github.ref }}
+            github.commit:${{ github.sha }}
+            github.environment:development
+            github.repository:${{ github.repository }}
+            github.run.id:${{ github.run_id }}
+            github.workflow:${{ github.workflow }}
+            team.workstream:learn-testing
+            test.source:github-actions
+            test.implementation:go-test
+            test.type:unit
+
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
