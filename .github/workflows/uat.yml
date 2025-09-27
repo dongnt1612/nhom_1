@@ -29,11 +29,3 @@ jobs:
       environment: UAT
     needs: build
     secrets: inherit
-  test-acceptance:
-    name: Run Acceptance Tests
-    if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/test-acceptance.reusable.yml
-    with:
-      environment: UAT
-    needs: deploy
-    secrets: inherit

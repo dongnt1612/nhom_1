@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# script/test: Run tests for the specified language or all languages.
+# script/test: Run Go backend tests.
 
 # Exit immediately if an error occurs
 set -euo pipefail
@@ -8,5 +8,5 @@ set -euo pipefail
 # Go to the project directory
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-echo '==> Running tests...'
-npx vitest run --coverage
+echo '==> Running Go backend tests...'
+go test ./backend -v -cover -coverprofile=backend/coverage.out

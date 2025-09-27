@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# script/setup: Set up the environment for development.
+# script/setup: Set up the environment for Go development.
 
 # Exit immediately if an error occurs
 set -euo pipefail
@@ -8,17 +8,21 @@ set -euo pipefail
 # Go to the project directory
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-# Check if npm is available
-hash npm 2>/dev/null || {
-    echo "Command \`npm\` not found. Please install npm first."
+# Check if go is available
+hash go 2>/dev/null || {
+    echo "Command \`go\` not found. Please install Go first."
     exit 1
 }
 
-echo '==> Install TypeScript/Node.js dependencies…'
-# Check if running in CI environment
-CI_MODE="${CI:-false}"
-if [[ "$CI_MODE" == "true" ]]; then
-    npm ci
-else
-    npm install
-fi
+echo '==> Setting up Go environment...'
+echo "Go version: $(go version)"
+
+# Download Go dependencies
+echo '==> Downloading Go dependencies...'
+go mod download
+
+# Verify Go module
+echo '==> Verifying Go module...'
+go mod verify
+
+echo '==> Setup complete!'

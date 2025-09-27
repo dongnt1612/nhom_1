@@ -3,7 +3,15 @@
     "version": "1.0.4",
     "private": true,
     "scripts": {
-        "start": "tsx server/main.ts"
+        "start": "tsx server/main.ts",
+        "dev": "cd backend && go run main.go",
+        "dev:root": "go run ./backend",
+        "test:backend": "cd backend && go test -v",
+        "test:root": "go test ./backend -v",
+        "build:backend": "cd backend && go build -o ../device-management main.go",
+        "build:root": "go build -o device-management ./backend",
+        "build": "docker build -t device-management .",
+        "deploy": "docker run -p 8080:8080 device-management"
     },
     "dependencies": {
         "tsx": "^4.20.3"

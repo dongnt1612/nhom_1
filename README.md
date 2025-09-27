@@ -1,239 +1,158 @@
-# Learn Testing
+# Device Management System
 
-> **A comprehensive multi-language testing laboratory showcasing modern automated testing practices across different technology stacks.**
+A simple CRUD application for managing devices with a Go backend and vanilla HTML/CSS/JS frontend.
 
-**Learn Testing** is your gateway to mastering automated testing across multiple languages and frameworks. Whether you're a QA engineer, developer, or DevOps enthusiast, this repository provides hands-on examples and best practices for building robust test automation suites.
+## Features
 
-## Quick Start
+- **Backend**: Go server with REST API (no external dependencies)
+- **Frontend**: Single HTML file with inline CSS and JavaScript
+- **Storage**: In-memory storage (resets on server restart)
+- **CRUD Operations**: Create, Read, Update, Delete devices
+- **Device Properties**: ID, Name, Type, Status
 
-Choose your preferred development environment:
-
-## Development Environment Setup
-
-**Prerequisites:**
-
-- [Visual Studio Code](https://code.visualstudio.com/)
-- [Node.js](https://nodejs.org/en/download/) (version 22+)
-
-**Setup:**
-
-1. Install all prerequisites listed above
-2. Run the setup script: `./script/setup`
-3. Install recommended VS Code extensions: `Ctrl/Cmd + Shift + P` → `Extensions: Show Recommended Extensions`
-
-### Option 2: Dev Containers
-
-**Prerequisites:**
-
-- [Visual Studio Code](https://code.visualstudio.com/)
-- Container runtime:
-  - **macOS:** [OrbStack](https://orbstack.dev/) (recommended)
-  - **Other platforms:** [Docker Desktop](https://www.docker.com/products/docker-desktop)
-- [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-
-**Setup:**
-
-1. Install prerequisites
-2. Open VS Code in the project folder
-3. Run command: `Dev Containers: Reopen in Container`
-
-### Option 3: GitHub Codespaces
-
-**Prerequisites:**
-
-- [Visual Studio Code](https://code.visualstudio.com/)
-- [GitHub Codespaces extension](https://marketplace.visualstudio.com/items?itemName=GitHub.codespaces)
-
-**Setup:**
-
-1. Install the GitHub Codespaces extension
-2. Create a new codespace from the repository
-3. The environment will be automatically configured
-
-Or just click the button below to open in Codespaces:
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=learn-testing)
-
-## What You'll Learn
-
-This repository demonstrates real-world testing scenarios across multiple dimensions:
-
-### Testing Levels
-
-- **Unit Testing**: Fast, isolated component tests
-- **Integration Testing**: API and service integration validation
-- **End-to-End Testing**: Complete user journey automation
-- **Acceptance Testing**: Business requirement validation using BDD
-
-### Technology Stack (Main Branch)
-
-| Component        | Technology                            | Purpose                               |
-| ---------------- | ------------------------------------- | ------------------------------------- |
-| **Runtime**      | TypeScript + Node.js                  | Modern JavaScript development         |
-| **Unit Tests**   | [Vitest](https://vitest.dev/)         | Fast unit testing with coverage       |
-| **E2E Tests**    | [Playwright](https://playwright.dev/) | Cross-browser automation              |
-| **BDD Tests**    | [Gauge](https://gauge.org/)           | Business-readable test specifications |
-| **API Server**   | Express.js                            | Simple test target application        |
-| **Code Quality** | SonarQube                             | Static analysis and quality gates     |
-| **CI/CD**        | GitHub Actions + CircleCI             | Dual pipeline examples                |
-
-### Project Structure
+## Project Structure
 
 ```
-learn-testing/
-├── server/           # Simple HTTP server for testing
-├── tests/            # Unit and integration tests
-├── specs/            # Gauge BDD specifications
-├── coverage/         # Test coverage reports
-├── script/           # Automation scripts
-├── compose.yml       # Local SonarQube setup
-└── config files      # Tool configurations
+/
+├── backend/
+│   ├── main.go       # Go server with all logic
+│   ├── main_test.go  # Comprehensive tests
+│   └── go.mod        # Go module file
+├── frontend/
+│   └── index.html    # Single HTML file with UI
+└── package.json      # NPM scripts for convenience
 ```
 
-## Running Tests
+## Prerequisites
 
-### Development Workflow
+- Go 1.21 or later
+- A web browser
+
+## Running the Application
+
+### Option 1: Using npm scripts (if you have Node.js)
 
 ```bash
-# Run all unit tests with coverage
-./script/test-dev
+# Run the server
+npm run dev
+
+# Run tests
+npm run test:backend
+
+# Build binary
+npm run build:backend
 ```
 
-### Quality Assurance
+### Option 2: Using Go directly
 
 ```bash
-# Set up QA environment
-./script/setup-qa
+# Run the server
+go run backend/main.go
 
-# Start the test server
-npm run start
+# Run tests
+go test -v ./backend
 
-# Run complete test suite
-./script/test-qa
+# Build binary
+go build -o device-management ./backend
 ```
 
-### Local SonarQube Setup
+## Usage
+
+1. Start the server:
+   ```bash
+   npm run dev
+   # or
+   go run backend/main.go
+   ```
+
+2. Open your browser and go to: `http://localhost:8080`
+
+3. Use the web interface to:
+   - View all devices in the table
+   - Add new devices using the form
+   - Edit existing devices by clicking "Edit"
+   - Delete devices by clicking "Delete"
+
+## API Endpoints
+
+The backend provides a REST API:
+
+- `GET /api/devices` - Get all devices
+- `POST /api/devices` - Create a new device
+- `PUT /api/devices/{id}` - Update a device
+- `DELETE /api/devices/{id}` - Delete a device
+
+### Example API Usage
 
 ```bash
-# Start local SonarQube server
-docker-compose up -d
+# Get all devices
+curl http://localhost:8080/api/devices
 
-# Set environment variables
-export SONAR_HOST_URL="http://localhost:9000"
-export SONAR_TOKEN="your-token-here"
+# Create a device
+curl -X POST http://localhost:8080/api/devices \
+  -H "Content-Type: application/json" \
+  -d '{"name":"My Laptop","type":"laptop","status":"active"}'
 
-# Run analysis
-./script/sonarscan
+# Update a device
+curl -X PUT http://localhost:8080/api/devices/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Updated Laptop","type":"laptop","status":"inactive"}'
+
+# Delete a device
+curl -X DELETE http://localhost:8080/api/devices/1
 ```
 
-## CI/CD & DevOps
+## Sample Data
 
-This project showcases enterprise-grade CI/CD practices with dual pipeline implementations. Each pipeline is designed to demonstrate different deployment strategies and environments with 3 separate environments: UAT, SIT, and Production.
+The application starts with 3 sample devices:
+1. MacBook Pro (laptop, active)
+2. iPhone 15 (phone, active)
+3. iPad Air (tablet, inactive)
 
-### Deployment Pipelines
+## Device Types
 
-| Platform           | Deployment Target             | Container Registry |
-| ------------------ | ----------------------------- | ------------------ |
-| **GitHub Actions** | [Render](https://render.com/) | GitHub Packages    |
-| **CircleCI**       | [Heroku](https://heroku.com/) | Docker Hub         |
+- laptop
+- phone
+- tablet
+- desktop
+- server
+- other
 
-### Environment Configuration
+## Device Statuses
 
-- GitHub Actions Secrets & Variables
+- active
+- inactive
+- maintenance
 
-  | Name                 | Type     | Environment | Description                      |
-  | -------------------- | -------- | ----------- | -------------------------------- |
-  | `RENDER_API_KEY`     | Secret   | PROD, UAT   | Render deployment authentication |
-  | `RENDER_SERVICE_ID`  | Secret   | PROD, UAT   | Target service identifier        |
-  | `RENDER_SERVICE_URL` | Variable | UAT         | Service endpoint for testing     |
-  | `RP_API_KEY`         | Secret   | Repository  | ReportPortal integration         |
-  | `RP_PROJECT`         | Variable | Repository  | ReportPortal project name        |
-  | `RP_URL`             | Variable | Repository  | ReportPortal instance URL        |
-  | `SONAR_ORGANIZATION` | Variable | Repository  | SonarCloud organization          |
-  | `SONAR_PROJECT_KEY`  | Variable | Repository  | SonarCloud project identifier    |
-  | `SONAR_TOKEN`        | Secret   | Repository  | SonarCloud authentication        |
+## Testing
 
-- CircleCI Contexts
+The backend includes comprehensive tests covering:
+- Device store operations (CRUD)
+- HTTP handlers
+- Error cases
+- Edge cases
 
-  | Variable               | Context      | Description                     |
-  | ---------------------- | ------------ | ------------------------------- |
-  | `DOCKER_HUB_TOKEN`     | docker-hub   | Docker Hub authentication token |
-  | `DOCKER_HUB_USERNAME`  | docker-hub   | Docker Hub username             |
-  | `DOCKER_IMAGE`         | docker-hub   | Docker image name               |
-  | `HEROKU_API_KEY`       | heroku       | Heroku deployment key           |
-  | `HEROKU_APP_NAME_PROD` | heroku       | Production app name             |
-  | `HEROKU_APP_NAME_UAT`  | heroku       | UAT app name                    |
-  | `HEROKU_APP_URL_UAT`   | heroku       | UAT app URL for testing         |
-  | `RP_API_KEY`           | reportportal | ReportPortal integration        |
-  | `RP_PROJECT`           | reportportal | ReportPortal project            |
-  | `RP_URL`               | reportportal | ReportPortal URL                |
-  | `SONAR_ORGANIZATION`   | sonar        | SonarCloud organization         |
-  | `SONAR_TOKEN`          | sonar        | SonarCloud token                |
-
-## Git Workflow
-
-This project follows **ReleaseFlow** - a streamlined branching strategy optimized for continuous delivery:
-
-```mermaid
-gitGraph
-    commit id: "Initial"
-    branch feature/auth
-    checkout feature/auth
-    commit id: "Add auth"
-    checkout main
-    merge feature/auth
-    branch release/v1.0.0
-    checkout release/v1.0.0
-    commit
-    commit id: "Bump v1.0.0" tag: "v1.0.0"
-    checkout main
-    commit
-    commit
-    branch release/v1.2.0
-    checkout release/v1.2.0
-    commit
-    checkout main
-    commit
+Run tests with:
+```bash
+npm run test:backend
+# or
+go test -v ./backend
 ```
 
-### Branch Strategy
+## Architecture
 
-- **`main`**: Production-ready code, always deployable
-- **`feature/*`**: Short-lived branches for new features (created from `main`)
-- **`release/*`**: Release preparation and final testing (e.g., `release/v1.0.0`)
-- **`hotfix/*`**: Critical fixes from production tags, cherry-picked to `main`
+### Backend (Go)
 
-### Release Process
+- **Single file**: All logic in `main.go` for simplicity
+- **In-memory storage**: Thread-safe map with mutex
+- **Standard library only**: No external dependencies
+- **CORS enabled**: For frontend integration
+- **RESTful API**: Standard HTTP methods and status codes
 
-1. **Feature Development**: `feature/feature-name` → `main`
-2. **Release Preparation**: `release/v1.0.0` from `main`
-3. **Production Release**: Tag `v1.0.0` and deploy
-4. **Hot fixes**: `hotfix/critical-fix` from tag → `release` → cherry-pick to `main`
+### Frontend (HTML/CSS/JS)
 
-## Technology Showcase
-
-Explore testing approaches across different technology stacks in dedicated branches:
-
-### Python Ecosystem
-
-- [`python/playwright`](https://github.com/thanhph111/learn-testing/tree/python/playwright) - Modern browser automation
-- [`python/robot-framework`](https://github.com/thanhph111/learn-testing/tree/python/robot-framework) - Keyword-driven testing
-- [`python/selenium`](https://github.com/thanhph111/learn-testing/tree/python/selenium) - Classic web automation
-
-### TypeScript/JavaScript
-
-- [`typescript/gauge`](https://github.com/thanhph111/learn-testing/tree/typescript/gauge) - BDD with Gauge framework
-- [`typescript/playwright`](https://github.com/thanhph111/learn-testing/tree/typescript/playwright) - Cross-browser testing
-- [`typescript/selenium`](https://github.com/thanhph111/learn-testing/tree/typescript/selenium) - WebDriver automation
-
-### Java Enterprise
-
-- [`java/playwright`](https://github.com/thanhph111/learn-testing/tree/java/playwright) - Enterprise browser testing
-- [`java/selenium`](https://github.com/thanhph111/learn-testing/tree/java/selenium) - Traditional Selenium approach
-
-### API Testing
-
-- [`newman`](https://github.com/thanhph111/learn-testing/tree/newman) - Postman collection automation
-- [`hurl`](https://github.com/thanhph111/learn-testing/tree/hurl) - Plain text HTTP testing
-
-> **Tip**: Each branch contains a comprehensive README with framework-specific setup instructions and best practices.
+- **Single file**: Everything in `index.html`
+- **Vanilla JavaScript**: No frameworks or build tools
+- **Responsive design**: Works on desktop and mobile
+- **Real-time updates**: UI updates immediately after operations
+- **Error handling**: User-friendly error messages

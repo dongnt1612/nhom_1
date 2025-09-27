@@ -1,22 +1,34 @@
-FROM node:24-alpine
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy Go module files
+COPY go.mod ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Download dependencies (if any)
+RUN go mod download
 
 # Copy source code
-COPY server/ ./server/
-COPY tsconfig.json ./
+COPY backend/ ./backend/
+COPY frontend/ ./frontend/
 
-# Install tsx for running TypeScript
-RUN npm install -g tsx
+# Build the Go binary
+RUN cd backend && go build -o ../device-management main.go
+
+# Final stage
+FROM alpine:latest
+
+WORKDIR /app
+
+# Install ca-certificates for HTTPS requests
+RUN apk --no-cache add ca-certificates
+
+# Copy the binary and frontend files
+COPY --from=builder /app/device-management .
+COPY --from=builder /app/frontend/ ./frontend/
 
 # Expose port
-EXPOSE 3000
+EXPOSE 8080
 
 # Start the server
-CMD ["tsx", "server/main.ts"]
+CMD ["./device-management"]
